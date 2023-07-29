@@ -16,27 +16,41 @@ function div(a, b) {
     return a / b;
 }
 
+function round(numPlaces, num) {
+    let roundProduct = 1;
+    for(let i = 1; i <= numPlaces; i++) {
+        roundProduct *= 10;
+    }
+    return Math.round((num + Number.EPSILON) * roundProduct) / roundProduct;
+}
+
 function operate(operator, a, b) {
     if(typeof a !== "number" || typeof b !== "number") {
         throw new Error("Operand given is not a number.");
     }
 
+    let res = null;
     if(operator === "+") {
-        return add(a, b);
+        res = add(a, b);
     } else if(operator === "-") {
-        return sub(a, b);
+        res = sub(a, b);
     } else if(operator === "x") {
-        return mul(a, b);
+        res = mul(a, b);
     } else if(operator === "÷") {
-        return div(a, b);
+        if(b === 0) {
+            return "LMAO";
+        }
+        res = div(a, b);
     } else {
         throw new Error("Operator is not part of calculator.");
     }
+    return round(6, res);
 }
 
 let operandA;
 let operandB;
 let operator;
+let justCalculated = false;
 
 function initializeConditions() {
     operandA = "0";
@@ -81,7 +95,7 @@ display.textContent = displayVal;
 // Button functions
 
 function isNumeric(str) {
-    return /^[0-9]$/.test(str);
+    return /^[0-9]+$/.test(str);
 }
 
 function isOperator(str) {
@@ -96,13 +110,13 @@ function resetDisplay() {
 
 function updateDisplay(e) {
     // Set operand A
-    if(operandA === "0" && isNumeric(this.textContent) && operator === null && operandB === null) {
+    if((operandA === "0" || justCalculated) && isNumeric(this.textContent) && operator === null && operandB === null) {
         operandA = this.textContent;
     // Set operand B
     } else if(isNumeric(this.textContent) && ((operandB === "0") || (operator !== null && operandB === null))) {
         operandB = this.textContent;
     // Set operator
-    } else if(isOperator(this.textContent)) {
+    } else if(isOperator(this.textContent) && operator === null) {
         operator = this.textContent;
     // Add to operand A
     } else if(operator === null && (isNumeric(this.textContent) || (this.textContent === "." && !operandA.includes(".")))) {
@@ -111,12 +125,17 @@ function updateDisplay(e) {
     } else if(operandB !== null && (isNumeric(this.textContent) || (this.textContent === "." && !operandB.includes(".")))) {
         operandB += this.textContent;
     // Want our result
-    } else if(this.textContent === "=" && operator !== null && operandB !== null) {
+    } else if((this.textContent === "=" || isOperator(this.textContent)) && operator !== null && operandB !== null) {
         const res = operate(operator, Number(operandA), Number(operandB));
         initializeConditions();
         operandA = res;
         displayVal = res;
+        if(isOperator(this.textContent)){
+            operator = this.textContent;
+            displayVal += operator;
+        }
         display.textContent = displayVal;
+        justCalculated = true;
         return;
     } else if(this.textContent.toLowerCase() === "clear") {
         resetDisplay();

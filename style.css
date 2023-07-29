@@ -16,10 +16,15 @@ body {
     margin: 5px;
 }
 
+.calculator {
+    width: 500px;
+}
+
 .display {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    overflow: hidden;
     padding-right: 20px;
     font-size: 50px;
     border: solid;
@@ -29,7 +34,6 @@ body {
 .operation_buttons {
     display: flex;
     flex-direction: column;
-    width: 500px;
     align-items: center;
     flex: 1;
 }
