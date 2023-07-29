@@ -68,7 +68,7 @@ const calculatorLayout = [
     [4, 5, 6, "x"],
     [1, 2, 3, "-"],
     [0, ".", "=", "+"],
-    ["Clear"]
+    ["Clear", "Backspace"]
 ]
 for(let i = 0; i < calculatorLayout.length; i++) {
     const buttonRow = document.createElement("div");
@@ -79,6 +79,9 @@ for(let i = 0; i < calculatorLayout.length; i++) {
         operationButton.textContent = calculatorLayout[i][j];
         if(operationButton.textContent.toLowerCase() === "clear") {
             operationButton.id = "clear_button";
+        }
+        if(operationButton.textContent.toLowerCase() === "backspace") {
+            operationButton.id = "backspace_button";
         }
         buttonRow.appendChild(operationButton);
     }
@@ -112,11 +115,12 @@ function updateDisplay(e) {
     // Set operand A
     if((operandA === "0" || justCalculated) && isNumeric(this.textContent) && operator === null && operandB === null) {
         operandA = this.textContent;
+        justCalculated = false;
     // Set operand B
     } else if(isNumeric(this.textContent) && ((operandB === "0") || (operator !== null && operandB === null))) {
         operandB = this.textContent;
     // Set operator
-    } else if(isOperator(this.textContent) && operator === null) {
+    } else if(isOperator(this.textContent) && operator === null && operandA !== null) {
         operator = this.textContent;
     // Add to operand A
     } else if(operator === null && (isNumeric(this.textContent) || (this.textContent === "." && !operandA.includes(".")))) {
@@ -124,8 +128,24 @@ function updateDisplay(e) {
     // Add to operand B
     } else if(operandB !== null && (isNumeric(this.textContent) || (this.textContent === "." && !operandB.includes(".")))) {
         operandB += this.textContent;
+    } else if(this.textContent.toLowerCase() === "backspace") {
+        if(operandB !== null) {
+            operandB = operandB.slice(0, operandB.length-1);
+            if(operandB === "") {
+                operandB = null;
+            }
+        } else if(operator !== null) {
+            operator = operator.slice(0, operator.length-1);
+            operator = null;
+        } else if(operandA !== null && isNumeric(operandA)) {
+            operandA = operandA.slice(0, operandA.length-1);
+            if(operandA === "") {
+                operandA = "0";
+            }
+        }
+    }
     // Want our result
-    } else if((this.textContent === "=" || isOperator(this.textContent)) && operator !== null && operandB !== null) {
+    else if((this.textContent === "=" || isOperator(this.textContent)) && operator !== null && operandB !== null) {
         const res = operate(operator, Number(operandA), Number(operandB));
         initializeConditions();
         operandA = res;

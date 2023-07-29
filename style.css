@@ -46,10 +46,6 @@ body {
 
 .operation_button {
     font-size: xx-large;
-    width: 25%;
-    height: 100px;
-}
-
-#clear_button {
     width: 100%;
+    height: 100px;
 }
